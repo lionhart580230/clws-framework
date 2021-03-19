@@ -1,6 +1,7 @@
 package clCommon
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -72,4 +73,20 @@ func Bool(_val string) bool {
 		return true
 	}
 	return false
+}
+
+
+func HtmlSpecialChars(val string) string {
+
+	r, _ := regexp.Compile(`[\&]`)
+	val = string(r.ReplaceAll([]byte(val), []byte("&amp;")))
+	r, _ = regexp.Compile(`[\>]`)
+	val = string(r.ReplaceAll([]byte(val), []byte("&gt;")))
+	r, _ = regexp.Compile(`[\<]`)
+	val = string(r.ReplaceAll([]byte(val), []byte("&lt;")))
+	r, _ = regexp.Compile(`[\"]`)
+	val = string(r.ReplaceAll([]byte(val), []byte("&quot;")))
+	r, _ = regexp.Compile(`[\']`)
+	val = string(r.ReplaceAll([]byte(val), []byte("&#039;")))
+	return val
 }

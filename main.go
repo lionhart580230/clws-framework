@@ -8,6 +8,7 @@ import (
 	"hongxia_api/core/clPacket"
 	"hongxia_api/core/clRouter"
 	"hongxia_api/core/clUserPool"
+	"hongxia_api/rule"
 	"net/http"
 	"strings"
 )
@@ -103,6 +104,12 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		isPass, params := ruleInfo.CheckParam(requestObj.Param)
+		if !isPass {
+			clDebug.Err("参数:%v列表检验不通过!", requestObj.Param)
+			continue
+		}
+
 		if ruleInfo.Login && !uInfo.IsLogin {
 			clDebug.Err("用户:%v 未登录! 无法访问需要登录的接口:%v", uInfo.ConnId, ruleInfo.Ac)
 			continue
@@ -113,7 +120,8 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		var resp = ruleInfo.Callback(uInfo, nil)
+		clDebug.Debug("收到参数列表: %+v", params)
+		var resp = ruleInfo.Callback(uInfo, params)
 		if resp != "" {
 			_ws.WriteMessage(websocket.TextMessage, []byte(resp))
 		}
@@ -127,5 +135,10 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
+
+	rule.InitRule()
+
 	Serve(19800)
+
+
 }

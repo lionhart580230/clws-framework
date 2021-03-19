@@ -8,7 +8,8 @@ import (
 type RouterParam struct {
 	Key string				// 参数的key
 	Def string				// 参数的默认值
-	PType uint32			// 参数的校验类型
+	PType int				// 参数的校验类型
+	Static bool				// 是否严格模式
 }
 
 
@@ -25,7 +26,7 @@ var mRouterLock sync.RWMutex
 
 // 初始化
 func init() {
-
+	mRouterMap = make(map[string] RouterRule)
 }
 
 // 添加路由规则
