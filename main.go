@@ -1,13 +1,16 @@
 package main
 
 import (
+	"clws-framework/core/clConfig"
+	"clws-framework/core/clDebug"
+	"clws-framework/core/clGlobal"
+	"clws-framework/core/clPacket"
+	"clws-framework/core/clRouter"
+	"clws-framework/core/clUserPool"
+	"clws-framework/rule"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"hongxia_api/core/clDebug"
-	"hongxia_api/core/clPacket"
-	"hongxia_api/core/clRouter"
-	"hongxia_api/core/clUserPool"
 	"net/http"
 	"strings"
 )
@@ -33,6 +36,9 @@ func UpgradeError(w http.ResponseWriter, r *http.Request, status int, reason err
 //@author xiaolan
 //@param _port 端口
 func Serve(_port uint32) error {
+
+	// 启动自动清理线程
+	go clUserPool.AutoCleanLogoutUser()
 
 	// websocket 服务
 	http.HandleFunc("/websocket", doWork)
@@ -80,6 +86,7 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 			} else {
 				clDebug.Info("用户断开连线...")
 			}
+			clUserPool.RemoveUser(uInfo.ConnId)
 			break
 		}
 
@@ -103,8 +110,15 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		isPass, params := ruleInfo.CheckParam(requestObj.Param)
+		if !isPass {
+			clDebug.Err("参数:%v列表检验不通过!", requestObj.Param)
+			continue
+		}
+
 		if ruleInfo.Login && !uInfo.IsLogin {
 			clDebug.Err("用户:%v 未登录! 无法访问需要登录的接口:%v", uInfo.ConnId, ruleInfo.Ac)
+			clRouter.SendMessage(uInfo,  requestObj.SYN, "needLogin", "您还未登录!", nil)
 			continue
 		}
 
@@ -113,9 +127,11 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		var resp = ruleInfo.Callback(uInfo, nil)
-		if resp != "" {
-			_ws.WriteMessage(websocket.TextMessage, []byte(resp))
+		clDebug.Debug("收到参数列表: %+v", params)
+		var resp = ruleInfo.Callback(uInfo, params)
+		if resp != nil {
+			serverResp := clPacket.NewPacketResp(requestObj.SYN, resp)
+			_ws.WriteMessage(websocket.TextMessage, []byte(serverResp))
 		}
 	}
 
@@ -127,5 +143,21 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
+
+	rule.InitRule()
+
+	myConf := clConfig.New("", 0)
+	var dbhost, dbuser, dbpass, dbname string
+	myConf.GetStrConfig("CONF", "DBHOST", "", &dbhost)
+	myConf.GetStrConfig("CONF", "DBUSER", "", &dbuser)
+	myConf.GetStrConfig("CONF", "DBPASS", "", &dbpass)
+	myConf.GetStrConfig("CONF", "DBNAME", "", &dbname)
+	clGlobal.InitMysqlConfig(dbhost, dbuser, dbpass, dbname)
+
+	var redishost, redisprefix string
+	myConf.GetStrConfig("CONF", "REDISHOST", "", &redishost)
+	myConf.GetStrConfig("CONF", "REDISPREFIX", "", &redisprefix)
+	clGlobal.InitRedisConfig(redishost, redisprefix)
+
 	Serve(19800)
 }
