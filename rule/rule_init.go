@@ -1,32 +1,20 @@
 package rule
 
 import (
-	"hongxia_api/core/clRouter"
-	"hongxia_api/core/clUserPool"
+	"clws-framework/api/api_example"
+	"clws-framework/core/clRouter"
 )
 
 func InitRule() {
 
+	// 普通用户登录
 	clRouter.AddRule(clRouter.RouterRule{
-		Ac:       "userLogin",
+		Ac:       "api_example",
 		Param:    []clRouter.RouterParam{
-			clRouter.RouterParam{
-				Key:   "user",
-				Def:   "",
-				PType: 0,
-				Static: false,
-			},
-			clRouter.RouterParam{
-				Key:   "pass",
-				Def:   "",
-				PType: 0,
-				Static: false,
-			},
+			clRouter.NewParam("param1", "", clRouter.ParamTypeSafe, true),
+			clRouter.NewParam("param2", "", clRouter.ParamTypeSafe, true),
 		},
-		Static:   false,
-		Callback: func(_uInfo *clUserPool.ClNetUserInfo, _params map[string]string) string {
-			return "OK"
-		},
+		Callback: api_example.ApiExample,
 		Login:    false,
 	})
 

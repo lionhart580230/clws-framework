@@ -1,7 +1,10 @@
 package clRouter
 
 import (
-	"hongxia_api/core/clUserPool"
+	"github.com/gorilla/websocket"
+	"clws-framework/core/clDebug"
+	"clws-framework/core/clPacket"
+	"clws-framework/core/clUserPool"
 	"sync"
 )
 
@@ -13,11 +16,20 @@ type RouterParam struct {
 }
 
 
+
+
+func JCode(_rc string, _param string, _data interface{}) *clPacket.RuleCBResp {
+	return &clPacket.RuleCBResp{
+		RC:  _rc,
+		Param: _param,
+		Data:  _data,
+	}
+}
+
 type RouterRule struct {
 	Ac string					// 路由名称
 	Param []RouterParam			// 路由参数
-	Static bool					// 是否必须
-	Callback func(_uInfo *clUserPool.ClNetUserInfo, _params map[string]string) string			// 回调函数
+	Callback func(_uInfo *clUserPool.ClNetUserInfo, _params map[string]string) *clPacket.RuleCBResp			// 回调函数
 	Login bool					// 是否需要登录
 }
 
@@ -48,4 +60,17 @@ func GetRule(_ac string) *RouterRule {
 		return nil
 	}
 	return &rule
+}
+
+
+// 发送消息
+func SendMessage(_user *clUserPool.ClNetUserInfo, _ack uint32, _rc string, _param string, _data interface{}) {
+	_user.ConnLock.Lock()
+	defer _user.ConnLock.Unlock()
+
+	var p = clPacket.NewPacketResp(_ack, JCode(_rc, _param, _data))
+	err := _user.Conn.WriteMessage(websocket.TextMessage, []byte(p))
+	if err != nil {
+		clDebug.Err("发送消息失败! 错误:%v", err)
+	}
 }

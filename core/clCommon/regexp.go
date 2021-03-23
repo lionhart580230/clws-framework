@@ -238,3 +238,9 @@ func CheckIsImageBase64(val string) bool {
 	reg, _ := regexp.Match(`^data\-(jpg|png|gif)\-[a-zA-Z0-9\/\=\;\,\+]+$`, []byte(val))
 	return reg
 }
+
+// 验证是否是一个md5格式
+func CheckIsMD5(val string) bool {
+	reg, _ := regexp.Match(`^[0-9a-zA-Z]{32}$`, []byte(val))
+	return reg
+}

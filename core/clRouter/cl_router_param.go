@@ -1,10 +1,20 @@
 package clRouter
 
 import (
-	"hongxia_api/core/clCommon"
+	"clws-framework/core/clCommon"
 	"net/url"
 )
 
+
+
+func NewParam(_key, _def string, _ptype int, _static bool) RouterParam {
+	return RouterParam{
+		Key:    _key,
+		Def:    _def,
+		PType:  _ptype,
+		Static: _static,
+	}
+}
 
 
 const (
@@ -31,6 +41,7 @@ const (
 	ParamTypeVersion = 20		// 版本号。支持最多四级子版本
 	ParamTypeImageBase64 = 24 // 图片的base64格式
 	ParamTypeTime = 25		// 匹配时间格式
+	ParamTypeMD5 = 26		// MD5类型字符串
 	ParamTypeDiy = 100		// 只跑自定义的参数检查函数
 )
 
@@ -89,6 +100,8 @@ func checkParam(_ptype int, _val string) string {
 		pass = clCommon.CheckIsVersion(_val)
 	case ParamTypeImageBase64:
 		pass = clCommon.CheckIsImageBase64(_val)
+	case ParamTypeMD5:
+		pass = clCommon.CheckIsMD5(_val)
 	case ParamTypeDiy:
 		pass = true
 	}

@@ -1,7 +1,7 @@
 package clUserPool
 
 import (
-	"hongxia_api/core/clCommon"
+	"clws-framework/core/clCommon"
 )
 
 
@@ -116,3 +116,6 @@ func (this *ClNetUserInfo) GetBool(_key string, _def bool) bool {
 	}
 	return clCommon.Bool(v)
 }
+
+
+

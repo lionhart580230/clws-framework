@@ -1,9 +1,13 @@
 package clCommon
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // 强制转换为int32类型
@@ -89,4 +93,26 @@ func HtmlSpecialChars(val string) string {
 	r, _ = regexp.Compile(`[\']`)
 	val = string(r.ReplaceAll([]byte(val), []byte("&#039;")))
 	return val
+}
+
+
+func Md5(str string) string {
+	h := md5.New()
+	h.Write([]byte(str)) // 需要加密的字符串为 123456
+	cipherStr := h.Sum(nil)
+	return hex.EncodeToString(cipherStr)
+}
+
+// 取一个随机数
+func RandInt(min int, max int) int {
+	if min == max {
+		return min
+	}
+	rand.Seed(time.Now().UnixNano())
+	var nan = int(0)
+	for i := 0; i < 10; i++ {
+		nan += int(rand.Int63())
+		nan = (nan % (max - min)) + (min)
+	}
+	return nan
 }
