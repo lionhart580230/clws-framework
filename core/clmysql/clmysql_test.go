@@ -1,7 +1,7 @@
 package clmysql
 
 import (
-	"clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clws-framework/core/clDebug"
 	"testing"
 	"time"
 )

@@ -1,8 +1,8 @@
 package rule
 
 import (
-	"clws-framework/api/api_example"
-	"clws-framework/core/clRouter"
+	"github.com/xiaolan580230/clws-framework/api/api_example"
+	"github.com/xiaolan580230/clws-framework/core/clRouter"
 )
 
 func InitRule() {

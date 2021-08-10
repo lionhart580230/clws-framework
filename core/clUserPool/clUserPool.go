@@ -2,7 +2,7 @@ package clUserPool
 
 import (
 	"github.com/gorilla/websocket"
-	"clws-framework/core/clCommon"
+	"github.com/xiaolan580230/clws-framework/core/clCommon"
 	"strings"
 	"sync"
 	"time"

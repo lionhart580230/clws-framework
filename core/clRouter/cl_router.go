@@ -2,9 +2,9 @@ package clRouter
 
 import (
 	"github.com/gorilla/websocket"
-	"clws-framework/core/clDebug"
-	"clws-framework/core/clPacket"
-	"clws-framework/core/clUserPool"
+	"github.com/xiaolan580230/clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clws-framework/core/clPacket"
+	"github.com/xiaolan580230/clws-framework/core/clUserPool"
 	"sync"
 )
 

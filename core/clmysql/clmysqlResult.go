@@ -1,7 +1,7 @@
 package clmysql
 
 import (
-	"clws-framework/core/clCommon"
+	"github.com/xiaolan580230/clws-framework/core/clCommon"
 	"strings"
 )
 

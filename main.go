@@ -1,10 +1,10 @@
 package main
 
 import (
-	"clws-framework/core/clGlobal"
-	"clws-framework/core/clWebsocket"
-	"clws-framework/rule"
 	"fmt"
+	"github.com/xiaolan580230/clws-framework/core/clGlobal"
+	"github.com/xiaolan580230/clws-framework/core/clWebsocket"
+	"github.com/xiaolan580230/clws-framework/rule"
 )
 
 func main() {

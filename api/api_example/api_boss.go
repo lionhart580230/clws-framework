@@ -1,10 +1,10 @@
 package api_example
 
 import (
-	"clws-framework/core/clDebug"
-	"clws-framework/core/clPacket"
-	"clws-framework/core/clRouter"
-	"clws-framework/core/clUserPool"
+	"github.com/xiaolan580230/clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clws-framework/core/clPacket"
+	"github.com/xiaolan580230/clws-framework/core/clRouter"
+	"github.com/xiaolan580230/clws-framework/core/clUserPool"
 )
 
 // Api例子

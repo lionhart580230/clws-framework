@@ -2,8 +2,8 @@ package clTunnel
 
 import (
 	"fmt"
-	"clws-framework/core/clCommon"
-	"clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clws-framework/core/clCommon"
+	"github.com/xiaolan580230/clws-framework/core/clDebug"
 	"sync"
 	"time"
 )

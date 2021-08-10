@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/json-iterator/go"
-	"clws-framework/core/clCommon"
+	"github.com/xiaolan580230/clws-framework/core/clCommon"
 	"reflect"
 	"regexp"
 	"strings"

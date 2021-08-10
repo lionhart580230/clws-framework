@@ -1,8 +1,8 @@
 package model_example
 
 import (
-	"clws-framework/core/clDebug"
-	"clws-framework/core/clGlobal"
+	"github.com/xiaolan580230/clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clws-framework/core/clGlobal"
 )
 
 const TableName = "tb_example"

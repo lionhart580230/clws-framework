@@ -3,8 +3,8 @@ package clredis
 import (
 	"fmt"
 	"github.com/go-redis/redis"
-	"clws-framework/core/clCommon"
-	"clws-framework/core/cljson"
+	"github.com/xiaolan580230/clws-framework/core/clCommon"
+	"github.com/xiaolan580230/clws-framework/core/cljson"
 	"strings"
 	"sync"
 	"time"
