@@ -1,4 +1,4 @@
-module clws-framework
+module github.com/xiaolan580230/clws-framework
 
 go 1.12
 
