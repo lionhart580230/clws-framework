@@ -20,6 +20,16 @@ func Int32(_val string, _def int32) int32 {
 }
 
 
+// 强制转换为int32类型
+func Int(_val string, _def int) int {
+	i, e := strconv.ParseInt(_val, 10, 32)
+	if e != nil {
+		return _def
+	}
+	return int(i)
+}
+
+
 // 强制转换为int64类型
 func Int64(_val string, _def int64) int64 {
 	i, e := strconv.ParseInt(_val, 10, 64)

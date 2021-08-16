@@ -1,7 +1,6 @@
 package clPacket
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"time"
 )
@@ -20,7 +19,7 @@ type ClPacketReq struct {
 type ClPacketResp struct {
 	RP string `json:"rp"`			// 响应路由名称
 	TimeStamp uint32 `json:"ts"`	// 时间戳
-	Param string `json:"p"`			// 响应内容 json的base64加密串
+	Param interface{} `json:"p"`			// 响应内容 json的base64加密串
 	Tips string `json:"tip"`		// 提示
 	Sign string `json:"sg"`			// 签名串
 	ACK uint32 `json:"ack"`			// 响应ID, 与请求对应, 推送消息为0
@@ -30,24 +29,25 @@ type RuleCBResp struct {
 	RC string
 	Param string
 	Data interface{}
+	RoomId uint32
 }
 
 
 // 生成服务器响应包
 func NewPacketResp(_ack uint32, _data *RuleCBResp) string {
-	var paramStr = ""
-	if _data.Data != nil {
-		jsonBytes, err := json.Marshal(_data.Data)
-		if err != nil {
-			return ""
-		}
-		paramStr = base64.StdEncoding.EncodeToString(jsonBytes)
-	}
+	//var paramStr = ""
+	//if _data.Data != nil {
+	//	jsonBytes, err := json.Marshal(_data.Data)
+	//	if err != nil {
+	//		return ""
+	//	}
+	//	paramStr = base64.StdEncoding.EncodeToString(jsonBytes)
+	//}
 
 	var obj = ClPacketResp{
 		RP:        _data.RC,
 		TimeStamp: uint32(time.Now().Unix()),
-		Param:     paramStr,
+		Param:     _data.Data,
 		Sign:      "",
 		ACK:       _ack,
 		Tips: 	   _data.Param,

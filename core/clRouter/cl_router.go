@@ -1,7 +1,6 @@
 package clRouter
 
 import (
-	"github.com/gorilla/websocket"
 	"github.com/xiaolan580230/clws-framework/core/clDebug"
 	"github.com/xiaolan580230/clws-framework/core/clPacket"
 	"github.com/xiaolan580230/clws-framework/core/clUserPool"
@@ -65,11 +64,8 @@ func GetRule(_ac string) *RouterRule {
 
 // 发送消息
 func SendMessage(_user *clUserPool.ClNetUserInfo, _ack uint32, _rc string, _param string, _data interface{}) {
-	_user.ConnLock.Lock()
-	defer _user.ConnLock.Unlock()
-
 	var p = clPacket.NewPacketResp(_ack, JCode(_rc, _param, _data))
-	err := _user.Conn.WriteMessage(websocket.TextMessage, []byte(p))
+	err := _user.SendMsg(p)
 	if err != nil {
 		clDebug.Err("发送消息失败! 错误:%v", err)
 	}

@@ -7,7 +7,7 @@ import (
 
 func InitRule() {
 
-	// 普通用户登录
+	// 范例接口
 	clRouter.AddRule(clRouter.RouterRule{
 		Ac:       "api_example",
 		Param:    []clRouter.RouterParam{

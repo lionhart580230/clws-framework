@@ -70,8 +70,10 @@ func RemoveUser(_id uint64) {
 	if !exist {
 		return
 	}
-	obj.IsLogin = false
-	obj.LogoutTime = uint32(time.Now().Unix())
+	if obj.Conn != nil {
+		obj.Conn.Close()
+	}
+	delete(mUserPoolMap, _id)
 }
 
 // 根据用户连线Id获取用户指针
@@ -88,7 +90,7 @@ func GetUserByFlags(_flag uint64) *ClNetUserInfo {
 	defer mUserPoolLocker.RUnlock()
 
 	for _, val := range mUserPoolMap {
-		if val.Flags == _flag && val.IsLogin {
+		if (val.Flags & _flag) > 0 {
 			return val
 		}
 	}
@@ -122,6 +124,10 @@ func GetUsersByParams(_key, _val string) []*ClNetUserInfo {
 	}
 	return userList
 }
+
+
+
+
 
 
 // 自动清理5分钟内离线的用户

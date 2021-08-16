@@ -14,6 +14,27 @@ func (this *ClNetUserInfo) SetLogin(_isLogin bool) {
 
 
 
+// 设置用户flag
+//@param _key 参数key
+//@param _val 参数数值
+func (this *ClNetUserInfo) SetFlag(_flag uint64) {
+	this.ParamLock.Lock()
+	defer this.ParamLock.Unlock()
+
+	this.Flags |= _flag
+}
+
+
+// 移除用户flag
+func (this *ClNetUserInfo) RemoveFlag(_flag uint64) {
+	this.ParamLock.Lock()
+	defer this.ParamLock.Unlock()
+
+	this.Flags &= ^_flag
+}
+
+
+
 // 设置扩展参数
 //@param _key 参数key
 //@param _val 参数数值
@@ -25,6 +46,20 @@ func (this *ClNetUserInfo) SetParam(_key string, _val string) {
 }
 
 
+// 设置扩展参数
+//@param _key 参数key
+//@param _val 参数数值
+func (this *ClNetUserInfo) GetStr(_key string, _def string) string {
+	this.ParamLock.RLock()
+	defer this.ParamLock.RUnlock()
+
+	v, exist := this.Params[_key]
+	if !exist {
+		return _def
+	}
+	return v
+}
+
 // 获取Int32扩展参数
 func (this *ClNetUserInfo) GetInt32(_key string, _def int32) int32 {
 	this.ParamLock.RLock()
@@ -35,6 +70,19 @@ func (this *ClNetUserInfo) GetInt32(_key string, _def int32) int32 {
 		return _def
 	}
 	return clCommon.Int32(v, _def)
+}
+
+
+// 获取Int32扩展参数
+func (this *ClNetUserInfo) GetInt(_key string, _def int) int {
+	this.ParamLock.RLock()
+	defer this.ParamLock.RUnlock()
+
+	v, exist := this.Params[_key]
+	if !exist {
+		return _def
+	}
+	return clCommon.Int(v, _def)
 }
 
 
@@ -117,5 +165,14 @@ func (this *ClNetUserInfo) GetBool(_key string, _def bool) bool {
 	return clCommon.Bool(v)
 }
 
+
+
+// 发送消息
+func (this *ClNetUserInfo) SendMsg(_data string) error {
+	this.ParamLock.Lock()
+	defer this.ParamLock.Unlock()
+
+	return this.Conn.WriteMessage(1, []byte(_data))
+}
 
 
