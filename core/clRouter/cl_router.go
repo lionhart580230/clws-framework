@@ -1,7 +1,7 @@
 package clRouter
 
 import (
-	"github.com/xiaolan580230/clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clUtil/clLog"
 	"github.com/xiaolan580230/clws-framework/core/clPacket"
 	"github.com/xiaolan580230/clws-framework/core/clUserPool"
 	"sync"
@@ -13,8 +13,6 @@ type RouterParam struct {
 	PType int				// 参数的校验类型
 	Static bool				// 是否严格模式
 }
-
-
 
 
 func JCode(_rc string, _param string, _data interface{}) *clPacket.RuleCBResp {
@@ -63,10 +61,10 @@ func GetRule(_ac string) *RouterRule {
 
 
 // 发送消息
-func SendMessage(_user *clUserPool.ClNetUserInfo, _ack uint32, _rc string, _param string, _data interface{}) {
-	var p = clPacket.NewPacketResp(_ack, JCode(_rc, _param, _data))
+func SendMessage(_user *clUserPool.ClNetUserInfo, _rc string, _param string, _data interface{}) {
+	var p = clPacket.NewPacketResp( JCode(_rc, _param, _data) )
 	err := _user.SendMsg(p)
 	if err != nil {
-		clDebug.Err("发送消息失败! 错误:%v", err)
+		clLog.Error("发送消息失败! 错误:%v", err)
 	}
 }

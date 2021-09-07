@@ -1,7 +1,6 @@
 package clGlobal
 
 import (
-	"github.com/xiaolan580230/clhttp-framework/core/skylog"
 	"sync"
 )
 
@@ -11,20 +10,6 @@ func init() {
 	mConfigMap = make(map[string] string)
 }
 
-// 加载配置
-func LoadConfig(_section, _key, _default string) string {
-	mLocker.Lock()
-	defer mLocker.Unlock()
-
-	var temp string
-	if conf == nil {
-		skylog.LogErr("无法找到配置指针,请先执行Init指定配置文件")
-		return ""
-	}
-	conf.GetStr(_section, _key, _default, &temp)
-	mConfigMap[_section + "_" + _key] = temp
-	return temp
-}
 
 
 // 获取配置

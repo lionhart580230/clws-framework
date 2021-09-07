@@ -1,11 +1,10 @@
 package clGlobal
 
 import (
-	"github.com/xiaolan580230/clhttp-framework/core/clmysql"
-	"github.com/xiaolan580230/clhttp-framework/core/skyconfig"
-	"github.com/xiaolan580230/clhttp-framework/core/skylog"
-	"github.com/xiaolan580230/clhttp-framework/core/skyredis"
-
+	"github.com/xiaolan580230/clUtil/clConfig"
+	"github.com/xiaolan580230/clUtil/clLog"
+	"github.com/xiaolan580230/clUtil/clMysql"
+	"github.com/xiaolan580230/clUtil/clRedis"
 )
 
 var ServerVersion = `v1.0.0`
@@ -33,50 +32,41 @@ type SkyConfig struct {
 }
 
 var SkyConf SkyConfig
-var mRedis *skyredis.RedisObject
-var mMysql *clmysql.DBPointer
-var conf *skyconfig.Config
+var mRedis *clRedis.RedisObject
+var mMysql *clMysql.DBPointer
 
 func Init(_filename string) {
 
-	conf = skyconfig.New(_filename, 0)
 
-	conf.GetStr("mongodb", "mgo_url", "", &SkyConf.MgoUrl)
-	conf.GetStr("mongodb", "mgo_dbname", "", &SkyConf.MgoDBName)
-	conf.GetStr("mongodb", "mgo_user", "", &SkyConf.MgoUser)
-	conf.GetStr("mongodb", "mgo_pass", "", &SkyConf.MgoPass)
+	SkyConf.MgoUrl = clConfig.GetStr("mgo_url", "")
+	SkyConf.MgoDBName = clConfig.GetStr("mgo_dbname", "")
+	SkyConf.MgoUser = clConfig.GetStr("mgo_user", "")
+	SkyConf.MgoPass = clConfig.GetStr("mgo_pass", "")
 
-	conf.GetStr("mysql", "mysql_host", "", &SkyConf.MysqlHost)
-	conf.GetStr("mysql", "mysql_name", "", &SkyConf.MysqlName)
-	conf.GetStr("mysql", "mysql_user", "", &SkyConf.MysqlUser)
-	conf.GetStr("mysql", "mysql_pass", "", &SkyConf.MysqlPass)
+	SkyConf.MysqlHost = clConfig.GetStr("mysql_host", "")
+	SkyConf.MysqlName = clConfig.GetStr("mysql_name", "")
+	SkyConf.MysqlUser = clConfig.GetStr("mysql_user", "")
+	SkyConf.MysqlPass = clConfig.GetStr("mysql_pass", "")
 
-	conf.GetStr("redis", "redis_host", "", &SkyConf.RedisHost)
-	conf.GetStr("redis", "redis_prefix", "", &SkyConf.RedisPrefix)
-	conf.GetStr("redis", "redis_password", "", &SkyConf.RedisPass)
+	SkyConf.RedisHost = clConfig.GetStr("redis_host", "")
+	SkyConf.RedisPrefix = clConfig.GetStr("redis_prefix", "")
+	SkyConf.RedisPass = clConfig.GetStr("redis_password", "")
 
-	conf.GetUint32("system", "log_type", skylog.LOG_TYPE_ALI, &SkyConf.LogType)
-	conf.GetUint32("system", "log_level", skylog.LOG_LEVEL_ALL, &SkyConf.LogLevel)
+	SkyConf.IsCluster = clConfig.GetBool("is_cluster", false)
+	SkyConf.DebugRouter = clConfig.GetBool("debug_router", false)
 
-	conf.GetStr("system", "version", "", &ServerVersion)
-	conf.GetBool("system", "is_cluster", false, &SkyConf.IsCluster)
-	conf.GetBool("system", "debug_router", false, &SkyConf.DebugRouter)
-	skylog.New(ServerVersion)
-
-	skylog.LogDebug("%+v", SkyConf)
-	skylog.SetLevel(SkyConf.LogLevel)
-	skylog.SetType(SkyConf.LogType)
+	clLog.Debug("%+v", SkyConf)
 }
 
 
 // 获取redis连线
-func GetRedis() *skyredis.RedisObject {
+func GetRedis() *clRedis.RedisObject {
 	if mRedis != nil && mRedis.Ping() {
 		return mRedis
 	}
-	newRedis, err := skyredis.New(SkyConf.RedisHost, SkyConf.RedisPass, SkyConf.RedisPrefix)
+	newRedis, err := clRedis.New(SkyConf.RedisHost, SkyConf.RedisPass, SkyConf.RedisPrefix)
 	if err != nil {
-		skylog.LogErr("连接redis [%v] [%v] 失败! %v", SkyConf.RedisHost, SkyConf.RedisPass, err)
+		clLog.Error("连接redis [%v] [%v] 失败! %v", SkyConf.RedisHost, SkyConf.RedisPass, err)
 		return nil
 	}
 	mRedis = newRedis
@@ -85,12 +75,12 @@ func GetRedis() *skyredis.RedisObject {
 
 
 // 获取mysql连线
-func GetMysql() *clmysql.DBPointer {
+func GetMysql() *clMysql.DBPointer {
 	if mMysql != nil && mMysql.IsUsefull() {
 		return mMysql
 	}
 
-	db, err := clmysql.NewDB(SkyConf.MysqlHost, SkyConf.MysqlUser, SkyConf.MysqlPass, SkyConf.MysqlName)
+	db, err := clMysql.NewDB(SkyConf.MysqlHost, SkyConf.MysqlUser, SkyConf.MysqlPass, SkyConf.MysqlName)
 	if err != nil {
 		return nil
 	}

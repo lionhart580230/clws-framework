@@ -2,8 +2,8 @@ package clTunnel
 
 import (
 	"fmt"
+	"github.com/xiaolan580230/clUtil/clLog"
 	"github.com/xiaolan580230/clws-framework/core/clCommon"
-	"github.com/xiaolan580230/clws-framework/core/clDebug"
 	"sync"
 	"time"
 )
@@ -77,7 +77,7 @@ func Boardcast(_name string, _data string) {
 	defer mTunnelLocker.Unlock()
 	_, exist := mTunnelMap[_name]
 	if !exist {
-		clDebug.Debug("tunnel: %v 不存在! 无法广播数据!", _name)
+		clLog.Error("tunnel: %v 不存在! 无法广播数据!", _name)
 		return
 	}
 	for k, tunnel := range mTunnelMap[_name] {

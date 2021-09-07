@@ -1,7 +1,7 @@
 package clWebsocket
 
 import (
-	"github.com/xiaolan580230/clws-framework/core/clDebug"
+	"github.com/xiaolan580230/clUtil/clLog"
 	"github.com/xiaolan580230/clws-framework/core/clPacket"
 	"github.com/xiaolan580230/clws-framework/core/clRouter"
 	"github.com/xiaolan580230/clws-framework/core/clUserPool"
@@ -25,7 +25,7 @@ func CheckOrigin(r *http.Request) bool {
 
 // 升级协议错误回调
 func UpgradeError(w http.ResponseWriter, r *http.Request, status int, reason error) {
-	clDebug.Debug("UpgradeError: status:%v reason:%v", status, reason)
+	clLog.Debug("UpgradeError: status:%v reason:%v", status, reason)
 }
 
 
@@ -41,12 +41,12 @@ func StartWriteChannel() {
 		writeBuffer := <-mWriteChannel
 		clUserInfo := clUserPool.GetUserById(writeBuffer.connId)
 		if clUserInfo == nil {
-			clDebug.Err("发送数据: %v 失败! 未找到用户连线Id: %v", writeBuffer.data, writeBuffer.connId)
+			clLog.Error("发送数据: %v 失败! 未找到用户连线Id: %v", writeBuffer.data, writeBuffer.connId)
 			break
 		}
 		sendErr := clUserInfo.SendMsg(writeBuffer.data)
 		if sendErr != nil {
-			clDebug.Err("发送数据: %v 失败! 错误:%v", writeBuffer.data, sendErr)
+			clLog.Error("发送数据: %v 失败! 错误:%v", writeBuffer.data, sendErr)
 		}
 	}
 }
@@ -72,8 +72,6 @@ func Serve(_path string, _port uint32) error {
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", _port), nil); err != nil {
 		return err
 	}
-
-
 
 	return nil
 }
@@ -105,15 +103,15 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 		msgType, buffer, err := _ws.ReadMessage()
 		if err != nil {
 			if !strings.Contains(err.Error(), "EOF") && strings.Contains(err.Error(), "close 1005") {
-				clDebug.Err("ReadMessage Error: %v", err)
+				clLog.Error("ReadMessage Error: %v", err)
 			} else {
-				clDebug.Info("用户断开连线...")
+				clLog.Info("用户[%v]断开连线...", uInfo.ConnId)
 			}
 			clUserPool.RemoveUser(uInfo.ConnId)
 			break
 		}
 
-		clDebug.Info("收到消息: %v", string(buffer))
+		clLog.Debug("收到消息: %v", string(buffer))
 		// 心跳回应
 		if msgType == websocket.PingMessage {
 			_ws.WriteMessage(websocket.PongMessage, []byte{})
@@ -123,41 +121,41 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 		var requestObj clPacket.ClPacketReq
 		var unMarshaErr = json.Unmarshal(buffer, &requestObj)
 		if unMarshaErr != nil {
-			clDebug.Err("反序列化请求失败! 错误:%v 内容:(%v)", unMarshaErr, string(buffer))
+			clLog.Error("反序列化请求失败! 错误:%v 内容:(%v)", unMarshaErr, string(buffer))
 			continue
 		}
 
 		ruleInfo := clRouter.GetRule(requestObj.AC)
 		if ruleInfo == nil {
-			clDebug.Err("找不到路由规则: %v", requestObj.AC)
+			clLog.Error("找不到路由规则: %v", requestObj.AC)
 			continue
 		}
 
 		isPass, params := ruleInfo.CheckParam(requestObj.Param)
 		if !isPass {
-			clDebug.Err("参数:%v列表检验不通过!", requestObj.Param)
-			clRouter.SendMessage(uInfo,  requestObj.SYN, "paramError", "参数错误", nil)
+			clLog.Error("参数:%v列表检验不通过!", requestObj.Param)
+			clRouter.SendMessage(uInfo, "paramError", "参数错误", nil)
 			continue
 		}
 
 		if ruleInfo.Login && !uInfo.IsLogin {
-			clDebug.Err("用户:%v 未登录! 无法访问需要登录的接口:%v", uInfo.ConnId, ruleInfo.Ac)
-			clRouter.SendMessage(uInfo,  requestObj.SYN, "needLogin", "您还未登录", nil)
+			clLog.Error("用户:%v 未登录! 无法访问需要登录的接口:%v", uInfo.ConnId, ruleInfo.Ac)
+			clRouter.SendMessage(uInfo, "needLogin", "您还未登录", nil)
 			continue
 		}
 
 		if ruleInfo.Callback == nil {
-			clDebug.Err("接口:%v 回调函数不存在!", ruleInfo.Ac)
+			clLog.Error("接口:%v 回调函数不存在!", ruleInfo.Ac)
 			continue
 		}
 
-		clDebug.Debug("收到参数列表: %+v", params)
+		clLog.Debug("收到参数列表: %+v", params)
 		// 启动线程处理
 		go func(_connId uint64) {
 			var resp = ruleInfo.Callback(uInfo, params)
 			if resp != nil {
 				mWriteChannel <- WriteObj{
-					data: clPacket.NewPacketResp(requestObj.SYN, resp),
+					data: clPacket.NewPacketResp( resp ),
 					connId: _connId,
 				}
 			}

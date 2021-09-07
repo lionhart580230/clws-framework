@@ -61,6 +61,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
+github.com/xiaolan580230/clUtil v1.1.1 h1:LOvCQqKalNovLOhf7BmnoyPregFjgmjuyK7zugsd/zk=
+github.com/xiaolan580230/clUtil v1.1.1/go.mod h1:4RG1jSQiEozBgVqs06o/s0jxNRN5w1SOAQhVAMEBkgY=
 github.com/xiaolan580230/clhttp-framework v1.1.5 h1:YF/9ee8RTbEOVKPrsMjoieDig3rvZv/XmaSYeoRhCH4=
 github.com/xiaolan580230/clhttp-framework v1.1.5/go.mod h1:MUwwxuOh7QdwospZSkz+x9/qCQlRMx5syOidUx5JHJ0=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
