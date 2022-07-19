@@ -2,6 +2,7 @@ package clWebsocket
 
 import (
 	"github.com/xiaolan580230/clUtil/clLog"
+	"github.com/xiaolan580230/clUtil/clSuperMap"
 	"github.com/xiaolan580230/clws-framework/core/clPacket"
 	"github.com/xiaolan580230/clws-framework/core/clRouter"
 	"github.com/xiaolan580230/clws-framework/core/clUserPool"
@@ -10,6 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // 协议升级
@@ -36,7 +38,7 @@ var mWriteChannel chan WriteObj
 
 // 开启写入线程
 func StartWriteChannel() {
-	mWriteChannel = make(chan WriteObj)
+
 	for {
 		writeBuffer := <-mWriteChannel
 		clUserInfo := clUserPool.GetUserById(writeBuffer.connId)
@@ -52,7 +54,6 @@ func StartWriteChannel() {
 }
 
 
-
 // 启动RPC服务
 //@author xiaolan
 //@param _port 端口
@@ -60,6 +61,30 @@ func Serve(_path string, _port uint32) error {
 
 	// 启动自动清理线程
 	go clUserPool.AutoCleanLogoutUser()
+
+	mWriteChannel = make(chan WriteObj)
+
+	// 启动2个写入类型管道对象
+	go StartWriteChannel()
+	go StartWriteChannel()
+
+	// websocket 服务
+	http.HandleFunc("/" + _path, doWork)
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", _port), nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+
+
+func ServeSSL(_path string, _port uint32, _fileName string) error {
+
+	// 启动自动清理线程
+	go clUserPool.AutoCleanLogoutUser()
+
+	mWriteChannel = make(chan WriteObj)
 
 	// 启动2个写入类型管道对象
 	go StartWriteChannel()
@@ -69,7 +94,8 @@ func Serve(_path string, _port uint32) error {
 	http.HandleFunc("/" + _path, doWork)
 
 	// 启动服务
-	if err := http.ListenAndServe(fmt.Sprintf(":%v", _port), nil); err != nil {
+
+	if err := http.ListenAndServeTLS(fmt.Sprintf(":%v", _port), _fileName + ".crt", _fileName + ".pem", nil ); err != nil {
 		return err
 	}
 
@@ -97,6 +123,19 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uInfo := clUserPool.AddNewUser(_ws, false)
+	if eventOnAccept != nil {
+		if !eventOnAccept(uInfo, r) {
+
+			if eventOnClose != nil {
+				eventOnClose(uInfo)
+			}
+
+			// 从用户池中移除
+			clUserPool.RemoveUser(uInfo.ConnId)
+			return
+		}
+	}
+
 	// 消息循环
 	for {
 		// 获取消息
@@ -112,9 +151,11 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 		}
 
 		clLog.Debug("收到消息: %v", string(buffer))
+
 		// 心跳回应
 		if msgType == websocket.PingMessage {
 			_ws.WriteMessage(websocket.PongMessage, []byte{})
+			uInfo.LogoutTime = uint32(time.Now().Unix())
 			continue
 		}
 
@@ -150,19 +191,29 @@ func doWork(w http.ResponseWriter, r *http.Request) {
 		}
 
 		clLog.Debug("收到参数列表: %+v", params)
+		if eventBeforeRule != nil {
+			eventBeforeRule(uInfo, params)
+		}
 		// 启动线程处理
 		go func(_connId uint64) {
-			var resp = ruleInfo.Callback(uInfo, params)
+			var resp = ruleInfo.Callback(uInfo, clSuperMap.NewSuperMapByMap(params))
 			if resp != nil {
 				mWriteChannel <- WriteObj{
 					data: clPacket.NewPacketResp( resp ),
 					connId: _connId,
+				}
+
+				if eventAfterRule != nil {
+					eventAfterRule(uInfo, clPacket.NewPacketResp( resp ))
 				}
 			}
 		} (uInfo.ConnId)
 
 	}
 
+	if eventOnClose != nil {
+		eventOnClose(uInfo)
+	}
 	// 从用户池中移除
 	clUserPool.RemoveUser(uInfo.ConnId)
 }

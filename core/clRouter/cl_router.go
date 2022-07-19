@@ -2,6 +2,7 @@ package clRouter
 
 import (
 	"github.com/xiaolan580230/clUtil/clLog"
+	"github.com/xiaolan580230/clUtil/clSuperMap"
 	"github.com/xiaolan580230/clws-framework/core/clPacket"
 	"github.com/xiaolan580230/clws-framework/core/clUserPool"
 	"sync"
@@ -26,7 +27,7 @@ func JCode(_rc string, _param string, _data interface{}) *clPacket.RuleCBResp {
 type RouterRule struct {
 	Ac string					// 路由名称
 	Param []RouterParam			// 路由参数
-	Callback func(_uInfo *clUserPool.ClNetUserInfo, _params map[string]string) *clPacket.RuleCBResp			// 回调函数
+	Callback func(_uInfo *clUserPool.ClNetUserInfo, _params *clSuperMap.SuperMap) *clPacket.RuleCBResp			// 回调函数
 	Login bool					// 是否需要登录
 }
 
